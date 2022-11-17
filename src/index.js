@@ -4,8 +4,7 @@ import { BrowserRouter } from "react-router-dom";
 import "./bootstrap.min.css";
 import "./index.css";
 import "@fortawesome/fontawesome-free/css/all.min.css";
-import { Provider } from "react-redux";
-import store from "./store";
+
 import App from "./App";
 import reportWebVitals from "./reportWebVitals";
 

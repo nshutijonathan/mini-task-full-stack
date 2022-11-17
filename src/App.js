@@ -1,6 +1,6 @@
-import { useState, useEffect } from "react";
+import { useState } from "react";
 
-import { BrowserRouter, Routes, Route, useNavigate } from "react-router-dom";
+import { Routes, Route, useNavigate } from "react-router-dom";
 import { Container } from "react-bootstrap";
 import Header from "./components/Header";
 import Splash from "./components/Splash";
@@ -11,7 +11,6 @@ import Texts from "./components/Texts";
 import Calculator from "./components/Calculator";
 import Footer from "./components/Footer";
 import Logout from "./components/Logout";
-import { app } from "../src/firebase";
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import {
@@ -22,24 +21,25 @@ import {
 function App() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const [texts, setTexts] = useState(0);
   let navigate = useNavigate();
   const handleAction = (id) => {
     const authentication = getAuth();
     if (id === 2) {
       createUserWithEmailAndPassword(authentication, email, password)
         .then((response) => {
-          navigate("/");
+          navigate("/notifications");
           toast.success("success");
           sessionStorage.setItem(
             "Auth Token",
             response._tokenResponse.refreshToken
           );
-          console.log("response", response);
         })
         .catch((error) => {
           if (error.code === "auth/email-already-in-use") {
             toast.error("Email Already in Use");
+          }
+          if (error.code == "auth/weak-password") {
+            toast.error("Weak password");
           }
         });
     }
@@ -47,7 +47,7 @@ function App() {
       signInWithEmailAndPassword(authentication, email, password)
         .then((response) => {
           toast.success("success");
-          navigate("/");
+          navigate("/notifications");
           sessionStorage.setItem(
             "Auth Token",
             response._tokenResponse.refreshToken
@@ -63,14 +63,6 @@ function App() {
         });
     }
   };
-  useEffect(() => {
-    let authToken = sessionStorage.getItem("Auth Token");
-
-    if (!authToken) {
-      navigate("/login");
-    }
-    setTexts(localStorage.getItem("texts"));
-  }, [texts]);
   return (
     <>
       <ToastContainer />
@@ -78,7 +70,6 @@ function App() {
       <Container>
         <main className="py-3">
           <Routes>
-            <Route path="/" element={<Splash />} />
             <Route
               path="/login"
               element={
@@ -101,14 +92,12 @@ function App() {
                 />
               }
             />
-            <Route
-              path="/notifications"
-              element={<Notifications texts={texts} />}
-            />
+            <Route path="/logout" element={<Logout />} />
+            <Route path="/notifications" element={<Notifications />} />
             <Route path="/photos" element={<Photos />} />
             <Route path="/texts" element={<Texts />} />
             <Route path="/calculator" element={<Calculator />} />
-            <Route path="/logout" element={<Logout />} />
+            <Route path="/" element={<Splash />} />
           </Routes>
         </main>
       </Container>

@@ -1,15 +1,19 @@
 import React, { useState, useEffect } from "react";
-import { useSelector, useDispatch } from "react-redux";
 import { Button, Toast } from "react-bootstrap";
+import { useNavigate } from "react-router-dom";
 const Notifications = () => {
   const [show, setShow] = useState(false);
-  const [texts, setTexts] = useState(0);
+  let navigate = useNavigate();
+  let photos = localStorage.getItem("photos");
+  let texts = localStorage.getItem("texts");
   useEffect(() => {
-    let value = localStorage.getItem("texts");
-    setTexts(value);
+    let authToken = sessionStorage.getItem("Auth Token");
+    if (!authToken) {
+      navigate("/");
+    }
   });
   return (
-    <div className="container">
+    <div className="container text-center">
       <Toast
         onClose={() => setShow(false)}
         show={show}
@@ -27,11 +31,28 @@ const Notifications = () => {
           <strong className="mr-auto">Notification</strong>
           <small>12 mins ago</small>
         </Toast.Header>
-        <Toast.Body>{`There are some new ${texts} texts that you might love!`}</Toast.Body>
+        <Toast.Body>
+          {photos || texts > 0 ? (
+            <p>
+              There are some new {photos} photos and {texts} texts that you
+              might love!
+            </p>
+          ) : (
+            <p>There are some new updates that you might love!</p>
+          )}
+        </Toast.Body>
       </Toast>
       <header className="App-header">
-        <img src="" className="App-logo" alt="logo" />
-        <Button onClick={() => setShow(true)}>Get Notification</Button>
+        <Button
+          variant="primary"
+          className="btn-sm"
+          onClick={() => setShow(true)}
+        >
+          Get Notification
+        </Button>
+        <i className="fa fa-bell" aria-hidden="true">
+          {photos > 0 ? photos : texts}
+        </i>
       </header>
     </div>
   );

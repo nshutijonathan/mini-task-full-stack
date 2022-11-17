@@ -1,1 +1,0 @@
-export const GET_TEXTS_SUCCESS = "GET_TEXTS_SUCCESS";

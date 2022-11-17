@@ -1,5 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { Form, Table, Button } from "react-bootstrap";
+import { useNavigate } from "react-router-dom";
+import Loader from "./Loader";
 import { db } from "../firebase";
 import {
   collection,
@@ -15,7 +17,12 @@ const q = query(collection(db, "texts"), orderBy("timestamp", "desc"));
 const Texts = () => {
   const [texts, setTexts] = useState([]);
   const [value, setValue] = useState("");
+  let navigate = useNavigate();
   useEffect(() => {
+    let authToken = sessionStorage.getItem("Auth Token");
+    if (!authToken) {
+      navigate("/");
+    }
     onSnapshot(q, (snapshot) => {
       setTexts(
         snapshot.docs.map((doc) => ({
@@ -27,7 +34,7 @@ const Texts = () => {
     });
     localStorage.removeItem("texts");
     localStorage.setItem("texts", texts.length);
-  }, [value, "texts"]);
+  }, [value, texts.length, navigate]);
   const submitHandler = (e) => {
     e.preventDefault();
     addDoc(collection(db, "texts"), {
@@ -66,32 +73,29 @@ const Texts = () => {
             </tr>
           </thead>
           <tbody>
-            {texts.map((value, index) => {
-              {
-                console.log(
-                  "value",
-                  value["timestamp"],
-                  value.item["timestamp"].toDate()
+            {texts.length < 1 ? (
+              <Loader />
+            ) : (
+              texts.map((value, index) => {
+                return (
+                  <tr key={index}>
+                    <td>{value.item.text}</td>
+                    <td>
+                      {value.item["timestamp"].toDate().toString().slice(0, 16)}
+                    </td>
+                    <td>
+                      <Button
+                        variant="danger"
+                        className="btn-sm"
+                        onClick={() => handleDelete(value)}
+                      >
+                        <i className="fas fa-trash"></i>
+                      </Button>
+                    </td>
+                  </tr>
                 );
-              }
-              return (
-                <tr key={index}>
-                  <td>{value.item.text}</td>
-                  <td>
-                    {value.item["timestamp"].toDate().toString().slice(0, 16)}
-                  </td>
-                  <td>
-                    <Button
-                      variant="danger"
-                      className="btn-sm"
-                      onClick={() => handleDelete(value)}
-                    >
-                      <i className="fas fa-trash"></i>
-                    </Button>
-                  </td>
-                </tr>
-              );
-            })}
+              })
+            )}
           </tbody>
         </Table>
       </Form>
